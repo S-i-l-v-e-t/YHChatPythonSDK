@@ -44,7 +44,7 @@ sendMsg("653505810","group","text","HelloWorld")
 ## 其他功能:
 端口开放测试:
 ~~~
-from YHLib import runBot
+from YHLib import runBot,ping
 runBot(token="xxx",port=7888)
 ~~~
 之后使用浏览器访问
