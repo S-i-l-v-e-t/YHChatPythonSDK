@@ -18,7 +18,7 @@ requests:
 要令一个函数进行消息接收，请引用本SDK并使用`@onMessage`装饰器
 例子:
 ~~~
-from YHLib import onMessage,runBot
+from YHlib import onMessage,runBot
 @onMessage
 def onRecvMsg(ctx):
     print(ctx)
@@ -36,7 +36,7 @@ buttons :List 按钮，具体内容请参阅[官方文档](https://www.yhchat.co
 #### 附注:按钮只需单层列表
 例子:
 ~~~
-from YHLib import setToken,sendMsg
+from YHlib import setToken,sendMsg
 setToken(token="xxx")
 sendMsg("653505810","group","text","HelloWorld")
 ~~~
@@ -44,7 +44,7 @@ sendMsg("653505810","group","text","HelloWorld")
 ## 其他功能:
 端口开放测试:
 ~~~
-from YHLib import runBot,ping
+from YHlib import runBot,ping
 runBot(token="xxx",port=7888)
 ~~~
 之后使用浏览器访问  
