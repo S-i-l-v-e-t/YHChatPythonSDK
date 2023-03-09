@@ -32,7 +32,7 @@ contentType :String 取值:"text";"image";"markdown";"file",消息类型
 content :String 消息正文，注意：这只在text和markdown类型下有效  
 fileName :String 文件名，注意：这只在file类型下有效  
 url :String 资源链接，注意：这只在file,image类型下有效  
-buttons :List 按钮，具体内容请参阅[官方文档](https://www.yhchat.com/document/400-410),默认不适用  
+buttons :List 按钮，具体内容请参阅[官方文档](https://www.yhchat.com/document/400-410),默认不使用  
 #### 附注:按钮只需单层列表
 例子:
 ~~~
