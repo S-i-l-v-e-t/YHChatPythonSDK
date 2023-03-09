@@ -1,23 +1,15 @@
 from bottle import route,request,run
 import requests
 import json
+import time
 onMsgList=[]
 reply={}
 tok=''
-def send(func):
-    def deco(*args,**kwds):
-        global tok
-        func(*args,**kwds)
-        response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
-        reply=json.loads(response.text)
-        print(reply)
-    return deco
 def setToken(token):
     global tok
     tok=token
-@send
 def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
-    global headers,sjson
+    global headers,sjson,tok
     headers = {'Content-Type': 'application/json'}
     sampleDict={
     "recvId": recvId,
@@ -34,8 +26,22 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         
     if buttons!=False:
         sampleDict['content']['buttons']=[buttons]
-    sjson=json.dumps(sampleDict)
-    #print(sjson)
+    if type(recvId)==list:
+    #    sampleDict.update({'recvIds':sampleDict.pop("recvId")})
+    #群发API疑似失效
+        for yid in recvId:
+            sampleDict['recvId']=yid
+            sjson=json.dumps(sampleDict)
+            response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
+            reply=json.loads(response.text)
+            print(reply)
+            time.sleep(0.1)
+    else:
+        sjson=json.dumps(sampleDict)
+        #print(sjson)
+        response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
+        reply=json.loads(response.text)
+        print(reply)
 msgbox={"id":0,"type":"bot",'msg':'String','sender':0}
 @route("/sub",method='POST')
 def onMessage():
