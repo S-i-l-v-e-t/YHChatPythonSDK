@@ -54,4 +54,13 @@ runBot(token="xxx",port=7888)
 ~~~
 之后使用浏览器访问  
 `外网IP:7888/ping`  
-成功看到pong即为端口开放成功
+成功看到pong即为端口开放成功  
+  
+## 小礼物:`Identify.py`:
+针对目前没有官方的用户ID转用户名的api，制作了这个基于关注和入群事件的转换脚本  
+使用方法如下:  
+~~~Python
+import Identify
+#Yid在此处代表用户id
+print(Identify.fetch(Yid))
+~~~
