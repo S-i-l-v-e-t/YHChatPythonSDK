@@ -14,6 +14,7 @@ requests:
 `pip install requests`  
 
 ## 使用方法：
+**在一切开始之前，请*确保*你的订阅链接设置为`ip:port/sub`**  
 要令一个函数进行消息接收，请引用本SDK并使用`@onMessage`装饰器  
 要接收指令消息，请使用`@onCommand(cmd='commandName')`装饰器  
 要接收关注消息，请使用`@onFollowed`装饰器  
