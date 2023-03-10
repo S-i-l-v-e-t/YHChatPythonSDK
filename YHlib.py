@@ -1,7 +1,7 @@
 from bottle import route,request,run
 import requests
 import json
-#import time
+import time
 onMsgList=[]
 onTxtMsgList=[]
 onCmdDict={}
@@ -33,18 +33,19 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
     if buttons!=False:
         sampleDict['content']['buttons']=[buttons]
     if type(recvId)==list:
-        sampleDict.update({'recvIds':sampleDict.pop("recvId")})
-        response=requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
-        reply=json.loads(response.text)
-        print(reply)
+        #Official
+        #sampleDict.update({'recvIds':sampleDict.pop("recvId")})
+        #response=requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
+        #reply=json.loads(response.text)
+        #print(reply)
         ##Alternative
-        #for yid in recvId:
-        #    sampleDict['recvId']=yid
-        #    sjson=json.dumps(sampleDict)
-        #    response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
-        #    reply=json.loads(response.text)
-        #    print(reply)
-        #    time.sleep(0.1)
+        for yid in recvId:
+            sampleDict['recvId']=yid
+            sjson=json.dumps(sampleDict)
+            response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
+            reply=json.loads(response.text)
+            print(reply)
+            time.sleep(0.1)
     else:
         sjson=json.dumps(sampleDict)
         #print(sjson)
