@@ -1,4 +1,5 @@
 from YHlib import *
+import os
 idbase={}
 def fetch(Yid):
     global idbase
@@ -17,5 +18,9 @@ def fld(ctx):
     global idbase
     idbase[ctx['sender']]=ctx['nickname']
     _wdb()
-with open("./database/idbase.sdb",encoding='utf-8') as f:
-    idbase=eval(f.read())
+if os.path.exists("./database"):
+    with open("./database/idbase.sdb",encoding='utf-8') as f:
+        idbase=eval(f.read())
+else:
+    os.mkdir("./database")
+    _wdb()
