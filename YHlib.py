@@ -1,8 +1,14 @@
 from bottle import route,request,run
 import requests
 import json
-import time
+#import time
 onMsgList=[]
+onTxtMsgList=[]
+onCmdDict={}
+onFollowedList=[]
+onUnfollowedList=[]
+onJoinList=[]
+onLeaveList=[]
 reply={}
 tok=''
 def setToken(token):
@@ -27,48 +33,149 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
     if buttons!=False:
         sampleDict['content']['buttons']=[buttons]
     if type(recvId)==list:
-    #    sampleDict.update({'recvIds':sampleDict.pop("recvId")})
-    #群发API疑似失效
-        for yid in recvId:
-            sampleDict['recvId']=yid
-            sjson=json.dumps(sampleDict)
-            response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
-            reply=json.loads(response.text)
-            print(reply)
-            time.sleep(0.1)
+        sampleDict.update({'recvIds':sampleDict.pop("recvId")})
+        response=requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
+        reply=json.loads(response.text)
+        print(reply)
+        ##Alternative
+        #for yid in recvId:
+        #    sampleDict['recvId']=yid
+        #    sjson=json.dumps(sampleDict)
+        #    response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
+        #    reply=json.loads(response.text)
+        #    print(reply)
+        #    time.sleep(0.1)
     else:
         sjson=json.dumps(sampleDict)
         #print(sjson)
         response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
         reply=json.loads(response.text)
         print(reply)
-msgbox={"id":0,"type":"bot",'msg':'String','sender':0}
+
+def geneBaseBox(json,cnt=True):
+    msgbox={}
+    msgbox["type"]=json["event"]["chat"]["chatType"]
+    if cnt:
+        msgbox["contentType"]=json['event']['message']['contentType']
+        if msgbox['contentType'] in ('text','markdown'):
+            msgbox['msg']=json["event"]["message"]["content"]["text"]
+        elif msgbox['contentType']=='image':
+            msgbox['url']=json['event']['message']['content']['imageUrl']
+        elif msgbox['contentType']=='file':
+            msgbox['fileName']=json['event']['message']['content']['fileName']
+            msgbox['url']=json['event']['message']['content']['fileUrl']
+        elif msgbox['contentType']=='form':
+            msgbox['form']=json['event']['message']['content']['formJson']
+        msgbox['sender']=json["event"]["sender"]["senderId"]
+    if msgbox['type']=='group' and cnt:
+        msgbox["id"]=json["event"]["message"]["chatId"]
+    elif msgbox['type']=='group' :
+        msgbox['id']=json['event']['chatId']
+        msgbox['nickname']=json['event']['nickname']
+        msgbox['avatar']=json['event']['avatarUrl']
+        msgbox['sender']=json["event"]["userId"]
+    elif cnt:
+        msgbox["id"]=json["event"]["sender"]["senderId"]
+    else:
+        msgbox['id']=json['event']['userId']
+        msgbox['sender']=json['event']['userId']
+        msgbox['nickname']=json['event']['nickname']
+        msgbox['avatar']=json['event']['avatarUrl']
+    return msgbox
 @route("/sub",method='POST')
-def onMessage():
+def onRecvPost():
     global sender
     json=request.json
-    #print(json)
-    msgbox["type"]=json["event"]["chat"]["chatType"]
-    msgbox['msg']=json["event"]["message"]["content"]["text"]
-    msgbox['sender']=json["event"]["sender"]["senderId"]
-    if msgbox['type']=='group':
-        msgbox["id"]=json["event"]["message"]["chatId"]
-    else:
-        msgbox["id"]=json["event"]["sender"]["senderId"]
-    for func in onMsgList:
-        func(ctx=msgbox)
+    if json['header']['eventType']=="message.receive.normal":
+        #print(json)
+        msgbox=geneBaseBox(json)
+        for func in onMsgList:
+            func(ctx=msgbox)
+        if msgbox['contentType'] in ("text","markdown"):
+            for func in onTxtMsgList:
+                func(ctx=msgbox)
+    elif json['header']['eventType']=='message.receive.instruction':
+        cmd=json['event']['message']['instruction']
+        if cmd in onCmdDict:
+            msgbox=geneBaseBox(json)
+            msgbox['cmd']=cmd
+            onCmdDict[cmd](ctx=msgbox)
+    elif json['header']['eventType']=='bot.followed':
+        msgbox=geneBaseBox(json,False)
+        for func in onFollowedList:
+            func(ctx=msgbox)
+    elif json['header']['eventType']=="bot.unfollowed":
+        msgbox=geneBaseBox(json,False)
+        for func in onUnfollowedList:
+            func(ctx=msgbox)
+    elif json['header']['eventType']=="group.join":
+        msgbox=geneBaseBox(json,False)
+        for func in onJoinList:
+            func(ctx=msgbox)
+    elif json['header']['eventType']=='group.leave':
+        msgbox=geneBaseBox(json,False)
+        for func in onLeaveList:
+            func(ctx=msgbox)
 @route("/ping",method="GET")
 def ping():
     return "pong"
+class onLeave:
+    def __init__(self,func):
+        global onLeaveList
+        self.func=func
+        onLeaveList.append(func)
+    def __call__(self, *args, **kwds):
+        rv=self.func(*args,**kwds)
+        return rv
+class onJoin:
+    def __init__(self,func):
+        global onJoinList
+        self.func=func
+        onJoinList.append(func)
+    def __call__(self, *args, **kwds):
+        rv=self.func(*args,**kwds)
+        return rv
+class onUnfollowed:
+    def __init__(self,func):
+        global onUnfollowedList
+        self.func=func
+        onUnfollowedList.append(func)
+    def __call__(self, *args, **kwds):
+        rv=self.func(*args,**kwds)
+        return rv
+class onFollowed:
+    def __init__(self,func):
+        global onFollowedList
+        self.func=func
+        onFollowedList.append(func)
+    def __call__(self, *args, **kwds):
+        rv=self.func(*args,**kwds)
+        return rv
+class onCommand:
+    def __init__(self,func,cmd=''):
+        global onCmdDict
+        self.func=func
+        onCmdDict[cmd]=func
+    def __call__(self,*args,**kwds):
+        rv=self.func(*args,**kwds)
+        return rv
+class onTextMessage:
+    def __init__(self,func):
+        global onMsgList
+        self.func=func
+        onTxtMsgList.append(func)
+    def __call__(self, *args, **kwds): 
+        rv=self.func(*args,**kwds)
+        return rv
 class onMessage:
     def __init__(self,func):
         global onMsgList
         self.func=func
         onMsgList.append(func)
     def __call__(self, *args, **kwds): 
-        rc=self.func(*args,**kwds)
-        return rc
-def runBot(token,port=7888):
+        rv=self.func(*args,**kwds)
+        return rv
+def runBot(token='',port=7888):
     global tok
     tok=token
     run(host='0.0.0.0', port=port,loader=True)
