@@ -161,7 +161,7 @@ class onCommand:
         return rv
 class onTextMessage:
     def __init__(self,func):
-        global onMsgList
+        global onTxtMsgList
         self.func=func
         onTxtMsgList.append(func)
     def __call__(self, *args, **kwds): 
