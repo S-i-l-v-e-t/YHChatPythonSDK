@@ -1,13 +1,13 @@
 '''
 Date: 2023-03-11 08:57:22
-LastEditTime: 2023-03-11 09:14:36
+LastEditTime: 2023-03-11 09:51:10
 
 Copyright (c) 2023 by S-i-l-v-e-t, All Rights Reserved. 
 '''
 import sys
 sys.path.append('..')
 
-from YHlib import setToken,sendMsg
+from YHlib import setToken,sendMsg,batchSendMsg
 
 class Message():
     def __init__(self):
@@ -22,6 +22,14 @@ class Message():
         # 第二个参数：对方为用户时，值为user
         sendMsg("7058262","user","text","HelloWorld")
 
+    def batchSend(self):
+        recvIds = ["7058262"]
+        recvType = "user"
+        contentType = "text"
+        content = "Batch Hello World"
+        batchSendMsg(recvIds, recvType, contentType, content)
+
 if __name__ == "__main__":
     obj = Message()
     obj.send()
+    obj.batchSend()

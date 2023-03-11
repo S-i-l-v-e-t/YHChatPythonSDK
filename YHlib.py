@@ -53,6 +53,27 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         reply=json.loads(response.text)
         print(reply)
 
+# 批量发送消息
+def batchSendMsg(recvIds, recvType, contentType, content):
+    global sjson,tok
+    headers = {'Content-Type': 'application/json'}
+    sampleDict= {
+        "recvIds": recvIds,
+        "recvType": recvType,
+        "contentType": contentType,
+        "content": {
+            "text": content
+        }
+    }
+    if contentType=='image':
+        sampleDict['content']={'imageUrl':url}
+    sjson=json.dumps(sampleDict)
+    response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
+    reply=json.loads(response.text)
+    print(reply)
+
+
+
 def geneBaseBox(json,cnt=True):
     msgbox={}
     msgbox["type"]=json["event"]["chat"]["chatType"]
