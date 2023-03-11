@@ -66,7 +66,7 @@ def batchSendMsg(recvIds, recvType, contentType, content):
         }
     }
     if contentType=='image':
-        sampleDict['content']={'imageUrl':url}
+        sampleDict['content']={'imageUrl':content}
     sjson=json.dumps(sampleDict)
     response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
     reply=json.loads(response.text)
