@@ -46,7 +46,14 @@ from YHlib import setToken,sendMsg
 setToken(token="xxx")
 sendMsg("653505810","group","text","HelloWorld")
 ~~~
-
+### 要更快速的群发图片/文本消息,请使用`batchSendMsg()`函数
+#### batchSendMsg参数  
+recvIds :list 接收id列表  
+recvType :String 取值:"group";"user",接收者类型  
+contentType :String 取值:"text";"image";"markdown";"file",消息类型  
+content :String 消息正文/图片Url  
+### 多线程接收:  
+要使用多线程执行，请确保你有充足的服务器资源，以YHlib-MultiThreading代替YHlib即可
 ## 其他功能:
 端口开放测试:
 ~~~Python
