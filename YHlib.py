@@ -174,13 +174,20 @@ class onFollowed:
         rv=self.func(*args,**kwds)
         return rv
 class onCommand:
-    def __init__(self,func,cmd=''):
-        global onCmdDict
-        self.func=func
-        onCmdDict[cmd]=func
-    def __call__(self,*args,**kwds):
-        rv=self.func(*args,**kwds)
-        return rv
+    def __init__(self,cmd):
+        self.cmd=cmd
+        try:
+            func()
+        except:
+            pass
+    def __call__(self,func):
+        def warpper(*args,**kwds):
+            global onCmdDict
+            if self.cmd not in onCmdDict:
+                onCmdDict[cmd]=func
+            rv=func(args,kwds)
+            return rv
+        return warpper
 class onTextMessage:
     def __init__(self,func):
         global onTxtMsgList
