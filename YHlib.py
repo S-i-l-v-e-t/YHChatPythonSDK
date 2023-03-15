@@ -33,7 +33,6 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
     if buttons!=False:
         sampleDict['content']['buttons']=[buttons]
     if type(recvId)==list:
-        #Official
         #sampleDict.update({'recvIds':sampleDict.pop("recvId")})
         #response=requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
         #reply=json.loads(response.text)
@@ -52,27 +51,6 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
         reply=json.loads(response.text)
         print(reply)
-
-# 批量发送消息
-def batchSendMsg(recvIds, recvType, contentType, content):
-    global sjson,tok
-    headers = {'Content-Type': 'application/json'}
-    sampleDict= {
-        "recvIds": recvIds,
-        "recvType": recvType,
-        "contentType": contentType,
-        "content": {
-            "text": content
-        }
-    }
-    if contentType=='image':
-        sampleDict['content']={'imageUrl':content}
-    sjson=json.dumps(sampleDict)
-    response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/batch_send?token={}".format(tok), headers=headers, data=sjson)
-    reply=json.loads(response.text)
-    print(reply)
-
-
 
 def geneBaseBox(json,cnt=True):
     msgbox={}
@@ -117,7 +95,7 @@ def onRecvPost():
             for func in onTxtMsgList:
                 func(ctx=msgbox)
     elif json['header']['eventType']=='message.receive.instruction':
-        cmd=json['event']['message']['instruction']
+        cmd=json['event']['message']['instructionName']
         if cmd in onCmdDict:
             msgbox=geneBaseBox(json)
             msgbox['cmd']=cmd
@@ -175,22 +153,19 @@ class onFollowed:
         return rv
 class onCommand:
     def __init__(self,cmd):
+        global onCmdDict
         self.cmd=cmd
-        try:
-            func()
-        except:
-            pass
     def __call__(self,func):
         def warpper(*args,**kwds):
             global onCmdDict
             if self.cmd not in onCmdDict:
-                onCmdDict[cmd]=func
-            rv=func(args,kwds)
+                onCmdDict[self.cmd]=func
+            rv=func(*args,**kwds)
             return rv
         return warpper
 class onTextMessage:
     def __init__(self,func):
-        global onTxtMsgList
+        global onMsgList
         self.func=func
         onTxtMsgList.append(func)
     def __call__(self, *args, **kwds): 
