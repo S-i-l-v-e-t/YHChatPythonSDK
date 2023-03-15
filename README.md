@@ -34,13 +34,12 @@ runBot(token="xxx",port=7888)
 例子:
 ~~~Python
 from YHlib import onCommand,runBot
+import contextlib
 @onCommand(cmd='commandName')
 def onCmd(ctx):
     print(ctx)
-try:
+with contextlib.suppress(BaseException):
     onCmd()
-except:
-    pass
 runBot(token="xxx",port=7888)
 ~~~
 ### 要发送消息，请使用`sendMsg()`函数
