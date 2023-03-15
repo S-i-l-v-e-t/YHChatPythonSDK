@@ -232,6 +232,11 @@ class onMessage:
     def __call__(self, *args, **kwds): 
         rv=self.func(*args,**kwds)
         return rv
+def initOnCmd(func):
+    try:
+        func()
+    except:
+        print(onCmdDict)
 def runBot(token='',port=7888):
     global tok
     tok=token
