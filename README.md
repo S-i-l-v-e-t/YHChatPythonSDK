@@ -30,6 +30,19 @@ def onRecvMsg(ctx):
     print(ctx)
 runBot(token="xxx",port=7888)
 ~~~
+**特别的，当您使用`@onCommand(cmd='commandName')`装饰器时，需要对被装饰函数进行一次不加参数的调用来初始化**
+例子:
+~~~Python
+from YHlib import onCommand,runBot
+@onCommand(cmd='commandName')
+def onCmd(ctx):
+    print(ctx)
+try:
+    onCmd()
+except:
+    pass
+runBot(token="xxx",port=7888)
+~~~
 ### 要发送消息，请使用`sendMsg()`函数
 #### sendMsg参数:
 recvId :String 接收者id,输入列表视为群发  
