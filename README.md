@@ -33,13 +33,11 @@ runBot(token="xxx",port=7888)
 **特别的，当您使用`@onCommand(cmd='commandName')`装饰器时，需要对被装饰函数进行一次不加参数的调用来初始化**  
 例子:
 ~~~Python
-from YHlib import onCommand,runBot
-import contextlib
+from YHlib import onCommand,runBot,initOnCmd
 @onCommand(cmd='commandName')
 def onCmd(ctx):
     print(ctx)
-with contextlib.suppress(BaseException):
-    onCmd()
+initOnCmd(onCmd)
 runBot(token="xxx",port=7888)
 ~~~
 ### 要发送消息，请使用`sendMsg()`函数
