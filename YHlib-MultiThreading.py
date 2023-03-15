@@ -146,7 +146,7 @@ def onRecvPost():
             for func in onTxtMsgList:
                 ThreadCtrl(func=func,ctx=msgbox)
     elif json['header']['eventType']=='message.receive.instruction':
-        cmd=json['event']['message']['instruction']
+        cmd=json['event']['message']['instructionName']
         if cmd in onCmdDict:
             msgbox=geneBaseBox(json)
             msgbox['cmd']=cmd
@@ -202,14 +202,7 @@ class onFollowed:
     def __call__(self, *args, **kwds):
         rv=self.func(*args,**kwds)
         return rv
-class onCommand:
-    def __init__(self,func,cmd=''):
-        global onCmdDict
-        self.func=func
-        onCmdDict[cmd]=func
-    def __call__(self,*args,**kwds):
-        rv=self.func(*args,**kwds)
-        return rv
+
 class onTextMessage:
     def __init__(self,func):
         global onTxtMsgList
@@ -219,6 +212,18 @@ class onTextMessage:
     def __call__(self, *args, **kwds): 
         rv=self.func(*args,**kwds)
         return rv
+class onCommand:
+    def __init__(self,cmd):
+        global onCmdDict
+        self.cmd=cmd
+    def __call__(self,func):
+        def warpper(*args,**kwds):
+            global onCmdDict
+            if self.cmd not in onCmdDict:
+                onCmdDict[self.cmd]=func
+            rv=func(*args,**kwds)
+            return rv
+        return warpper
 class onMessage:
     def __init__(self,func):
         global onMsgList
