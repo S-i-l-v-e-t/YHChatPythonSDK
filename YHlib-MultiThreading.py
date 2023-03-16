@@ -202,7 +202,6 @@ class onFollowed:
     def __call__(self, *args, **kwds):
         rv=self.func(*args,**kwds)
         return rv
-
 class onTextMessage:
     def __init__(self,func):
         global onTxtMsgList
@@ -212,18 +211,6 @@ class onTextMessage:
     def __call__(self, *args, **kwds): 
         rv=self.func(*args,**kwds)
         return rv
-class onCommand:
-    def __init__(self,cmd):
-        global onCmdDict
-        self.cmd=cmd
-    def __call__(self,func):
-        def warpper(*args,**kwds):
-            global onCmdDict
-            if self.cmd not in onCmdDict:
-                onCmdDict[self.cmd]=func
-            rv=func(*args,**kwds)
-            return rv
-        return warpper
 class onMessage:
     def __init__(self,func):
         global onMsgList
@@ -232,11 +219,19 @@ class onMessage:
     def __call__(self, *args, **kwds): 
         rv=self.func(*args,**kwds)
         return rv
-def initOnCmd(func):
-    try:
-        func()
-    except:
-        print(onCmdDict)
+def onCommand(cmd):
+    def deco(func):
+        def warpper(*args,**kwds):
+            global onCmdDict
+            if cmd not in onCmdDict:
+                onCmdDict[cmd]=func
+            try:
+                rv=func(*args,**kwds)
+                return rv
+            except:
+                pass
+        return warpper
+    return deco
 def runBot(token='',port=7888):
     global tok
     tok=token
