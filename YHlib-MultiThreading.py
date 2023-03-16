@@ -221,10 +221,10 @@ class onMessage:
         return rv
 def onCommand(cmd):
     def deco(func):
+        global onCmdDict
+        if cmd not in onCmdDict:
+            onCmdDict[cmd]=func
         def warpper(*args,**kwds):
-            global onCmdDict
-            if cmd not in onCmdDict:
-                onCmdDict[cmd]=func
             try:
                 rv=func(*args,**kwds)
                 return rv
