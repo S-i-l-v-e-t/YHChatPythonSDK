@@ -48,8 +48,32 @@ class ThreadCtrl:
 def setToken(token):
     global tok
     tok=token
+def editMsg(msgId,recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
+    global headers,sjson,tok,reply
+    headers = {'Content-Type': 'application/json'}
+    sampleDict={
+    "msgId": msgId,
+    "recvId": recvId,
+    "recvType": recvType,
+    "contentType": contentType,
+    "content": {
+        "text": content
+        }
+    }
+    if contentType=='image':
+        sampleDict['content']={'imageUrl':url}
+    if contentType=='file':
+        sampleDict['content']={'fileName':fileName,'fileUrl':url}
+    if buttons!=False:
+        sampleDict['content']['buttons']=[buttons]
+    sjson=json.dumps(sampleDict)
+    #print(sjson)
+    response=lambda :requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/edit?token={}".format(tok), headers=headers, data=sjson)
+    threading.Thread(target=response).start()
+    reply=json.loads(response.text)
+    print(reply)
 def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
-    global headers,sjson,tok
+    global headers,sjson,tok,reply
     headers = {'Content-Type': 'application/json'}
     sampleDict={
     "recvId": recvId,
@@ -75,7 +99,8 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         for yid in recvId:
             sampleDict['recvId']=yid
             sjson=json.dumps(sampleDict)
-            response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
+            response = lambda :requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
+            threading.Thread(target=response).start()
             reply=json.loads(response.text)
             print(reply)
             time.sleep(0.1)
@@ -87,7 +112,7 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         print(reply)
 # 批量发送消息
 def batchSendMsg(recvIds, recvType, contentType, content):
-    global sjson,tok
+    global sjson,tok,reply
     headers = {'Content-Type': 'application/json'}
     sampleDict= {
         "recvIds": recvIds,
@@ -221,10 +246,10 @@ class onMessage:
         return rv
 def onCommand(cmd):
     def deco(func):
-        global onCmdDict
-        if cmd not in onCmdDict:
-            onCmdDict[cmd]=func
         def warpper(*args,**kwds):
+            global onCmdDict
+            if cmd not in onCmdDict:
+                onCmdDict[cmd]=func
             try:
                 rv=func(*args,**kwds)
                 return rv

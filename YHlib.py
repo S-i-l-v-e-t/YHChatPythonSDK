@@ -15,8 +15,31 @@ tok=''
 def setToken(token):
     global tok
     tok=token
+def editMsg(msgId,recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
+    global headers,sjson,tok,reply
+    headers = {'Content-Type': 'application/json'}
+    sampleDict={
+    "msgId": msgId,
+    "recvId": recvId,
+    "recvType": recvType,
+    "contentType": contentType,
+    "content": {
+        "text": content
+        }
+    }
+    if contentType=='image':
+        sampleDict['content']={'imageUrl':url}
+    if contentType=='file':
+        sampleDict['content']={'fileName':fileName,'fileUrl':url}
+    if buttons!=False:
+        sampleDict['content']['buttons']=[buttons]
+    sjson=json.dumps(sampleDict)
+    #print(sjson)
+    response = requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/edit?token={}".format(tok), headers=headers, data=sjson)
+    reply=json.loads(response.text)
+    print(reply)
 def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
-    global headers,sjson,tok
+    global headers,sjson,tok,reply
     headers = {'Content-Type': 'application/json'}
     sampleDict={
     "recvId": recvId,
@@ -87,6 +110,7 @@ def geneBaseBox(json,cnt=True):
 def onRecvPost():
     global sender
     json=request.json
+    print(json['header']['eventType'])
     if json['header']['eventType']=="message.receive.normal":
         #print(json)
         msgbox=geneBaseBox(json)
@@ -170,10 +194,10 @@ class onMessage:
         return rv
 def onCommand(cmd):
     def deco(func):
-        global onCmdDict
-        if cmd not in onCmdDict:
-            onCmdDict[cmd]=func
         def warpper(*args,**kwds):
+            global onCmdDict
+            if cmd not in onCmdDict:
+                onCmdDict[cmd]=func
             try:
                 rv=func(*args,**kwds)
                 return rv
