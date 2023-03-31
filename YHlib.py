@@ -10,6 +10,7 @@ onFollowedList=[]
 onUnfollowedList=[]
 onJoinList=[]
 onLeaveList=[]
+btnEventDict={}
 reply={}
 tok=''
 def setToken(token):
@@ -76,7 +77,7 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         reply=json.loads(response.text)
         print(reply)
 
-def geneBaseBox(json,cnt=True):
+def geneBaseBox(json,cnt=True,btn=True):
     msgbox={}
     msgbox["type"]=json["event"]["chat"]["chatType"]
     if cnt:
@@ -110,7 +111,7 @@ def geneBaseBox(json,cnt=True):
 def onRecvPost():
     global sender
     json=request.json
-    print(json['header']['eventType'])
+    #print(json['header']['eventType'])
     if json['header']['eventType']=="message.receive.normal":
         #print(json)
         msgbox=geneBaseBox(json)
@@ -141,6 +142,10 @@ def onRecvPost():
         msgbox=geneBaseBox(json,False)
         for func in onLeaveList:
             func(ctx=msgbox)
+    elif json['header']['eventType']=='button.report.inline':
+        msgbox={'type':json['event']['recvType'],'id':json['event']['recvId'],'value':json['event']['value']}
+        if msgbox['value'] in btnEventDict:
+            btnEventDict[msgbox['value']](ctx=msgbox)
 @route("/ping",method="GET")
 def ping():
     return "pong"
@@ -194,10 +199,25 @@ class onMessage:
         return rv
 def onCommand(cmd):
     def deco(func):
+        global onCmdDict
+        if cmd not in onCmdDict:
+            onCmdDict[cmd]=func
+            #print(onCmdDict)
         def warpper(*args,**kwds):
-            global onCmdDict
-            if cmd not in onCmdDict:
-                onCmdDict[cmd]=func
+            try:
+                rv=func(*args,**kwds)
+                return rv
+            except:
+                pass
+        return warpper
+    return deco
+def onButtonPressed(cmd):
+    def deco(func):
+        global btnEventDict
+        if cmd not in btnEventDict:
+            btnEventDict[cmd]=func
+            #print(onCmdDict)
+        def warpper(*args,**kwds):
             try:
                 rv=func(*args,**kwds)
                 return rv

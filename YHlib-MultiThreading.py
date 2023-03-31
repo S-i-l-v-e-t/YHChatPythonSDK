@@ -6,6 +6,7 @@ import time
 onMsgList=[]
 onTxtMsgList=[]
 onCmdDict={}
+btnEventDict={}
 onFollowedList=[]
 onUnfollowedList=[]
 onJoinList=[]
@@ -42,7 +43,6 @@ class ThreadCtrl:
                 for threadObj in ThreadCtrl.threads:
                     if not threadObj.getstat():
                         ThreadCtrl.threads.remove(threadObj)
-            print("deamonRunning")
             time.sleep(1)
 
 def setToken(token):
@@ -68,8 +68,7 @@ def editMsg(msgId,recvId,recvType,contentType,content='content',fileName='fileNa
         sampleDict['content']['buttons']=[buttons]
     sjson=json.dumps(sampleDict)
     #print(sjson)
-    response=lambda :requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/edit?token={}".format(tok), headers=headers, data=sjson)
-    threading.Thread(target=response).start()
+    response=requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/edit?token={}".format(tok), headers=headers, data=sjson)
     reply=json.loads(response.text)
     print(reply)
 def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
@@ -99,8 +98,7 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
         for yid in recvId:
             sampleDict['recvId']=yid
             sjson=json.dumps(sampleDict)
-            response = lambda :requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
-            threading.Thread(target=response).start()
+            response=requests.request("POST", "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token={}".format(tok), headers=headers, data=sjson)
             reply=json.loads(response.text)
             print(reply)
             time.sleep(0.1)
@@ -175,7 +173,7 @@ def onRecvPost():
         if cmd in onCmdDict:
             msgbox=geneBaseBox(json)
             msgbox['cmd']=cmd
-            onCmdDict[cmd](ctx=msgbox)
+            ThreadCtrl(func=onCmdDict[cmd],ctx=msgbox)
     elif json['header']['eventType']=='bot.followed':
         msgbox=geneBaseBox(json,False)
         for func in onFollowedList:
@@ -192,6 +190,10 @@ def onRecvPost():
         msgbox=geneBaseBox(json,False)
         for func in onLeaveList:
             ThreadCtrl(func=func,ctx=msgbox)
+    elif json['header']['eventType']=='button.report.inline':
+        msgbox={'type':json['event']['recvType'],'id':json['event']['recvId'],'value':json['event']['value']}
+        if msgbox['value'] in btnEventDict:
+            ThreadCtrl(func=btnEventDict[msgbox['value']],ctx=msgbox)
 @route("/ping",method="GET")
 def ping():
     return "pong"
@@ -246,10 +248,25 @@ class onMessage:
         return rv
 def onCommand(cmd):
     def deco(func):
+        global onCmdDict
+        if cmd not in onCmdDict:
+            onCmdDict[cmd]=func
+            #print(onCmdDict)
         def warpper(*args,**kwds):
-            global onCmdDict
-            if cmd not in onCmdDict:
-                onCmdDict[cmd]=func
+            try:
+                rv=func(*args,**kwds)
+                return rv
+            except:
+                pass
+        return warpper
+    return deco
+def onButtonPressed(cmd):
+    def deco(func):
+        global btnEventDict
+        if cmd not in btnEventDict:
+            btnEventDict[cmd]=func
+            #print(onCmdDict)
+        def warpper(*args,**kwds):
             try:
                 rv=func(*args,**kwds)
                 return rv
@@ -260,7 +277,7 @@ def onCommand(cmd):
 def runBot(token='',port=7888):
     global tok
     tok=token
+    ThreadCtrl(init=True)
     BottleThread=threading.Thread(run(host='0.0.0.0', port=port,loader=True))
     BottleThread.start()
-    ThreadCtrl(init=True)
 
