@@ -5,8 +5,7 @@
 此 SDK 适用于 Python3.7 及以上版本。  
 使用此 SDK 可以构建您的云湖机器人，能让您以非常便捷的方式和云湖服务进行交互。
 
-目前实现的功能:消息发送，所有类型(除按钮)订阅接收，端口开放测试  
-TODO:  按钮订阅接收
+目前实现的功能:消息发送，所有类型订阅接收，端口开放测试  
 
 ## 依赖:
 Bottle:  
@@ -18,6 +17,7 @@ requests:
 **在一切开始之前，请*确保*你的订阅链接设置为`http://ip:port/sub`**  
 要令一个函数进行消息接收，请引用本SDK并使用`@onMessage`装饰器  
 要接收指令消息，请使用`@onCommand(cmd='commandName')`装饰器  
+要接收按钮响应，请使用`@onButtonPressed(cmd='value')`装饰器  
 要接收关注消息，请使用`@onFollowed`装饰器  
 要接收取关消息，请使用`@onUnfollowed`装饰器  
 要接收入群消息，请使用`@onJoin`装饰器  
@@ -40,7 +40,8 @@ content :String 消息正文，注意：这只在text和markdown类型下有效
 fileName :String 文件名，注意：这只在file类型下有效  
 url :String 资源链接，注意：这只在file,image类型下有效  
 buttons :List 按钮，具体内容请参阅[官方文档](https://www.yhchat.com/document/400-410),默认不使用  
-*附注:按钮只需单层列表*
+*附注:按钮只需单层列表*  
+*汇报按钮的value值需要写在对应函数装饰器中*  
 例子:
 ~~~Python
 from YHlib import setToken,sendMsg
