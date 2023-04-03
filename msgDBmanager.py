@@ -17,7 +17,7 @@ def editMsg(msgId,recvId,recvType,contentType,content='content',fileName='fileNa
             _db.pop()
 def getLastMsg():
     global _db
-    return [list(_db.keys())[0],_db[list(_db.keys())[0]]]
+    return [list(_db.keys())[-1],_db[list(_db.keys())[-1]]]
 def getMsgIdList():
     global _db
     klist=[]
