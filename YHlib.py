@@ -92,6 +92,7 @@ def geneBaseBox(json,cnt=True,btn=True):
         elif msgbox['contentType']=='form':
             msgbox['form']=json['event']['message']['content']['formJson']
         msgbox['sender']=json["event"]["sender"]["senderId"]
+        msgbox['senderInfo']={'nickname':json['event']['sender']['senderNickname'],'level':json['event']['sender']['senderUserLevel']}
     if msgbox['type']=='group' and cnt:
         msgbox["id"]=json["event"]["message"]["chatId"]
     elif msgbox['type']=='group' :
@@ -106,6 +107,10 @@ def geneBaseBox(json,cnt=True,btn=True):
         msgbox['sender']=json['event']['userId']
         msgbox['nickname']=json['event']['nickname']
         msgbox['avatar']=json['event']['avatarUrl']
+    if msgbox['type']=='group':
+        msgbox['recvType']='group'
+    elif msgbox['type']=='bot':
+        msgbox['recvType']='user'
     return msgbox
 @route("/sub",method='POST')
 def onRecvPost():

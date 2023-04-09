@@ -7,14 +7,14 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
     if YHlib.reply['code']==1:
         _db[YHlib.reply['data']['messageInfo']['msgId']]={'recvId':recvId,'recvType':recvType,'contentType':contentType,'content':content,'fileName':fileName,'url':url,'buttons':buttons}
         if len(_db)>_dbMaxLength:
-            _db.pop()
+            _db.pop(list(_db.keys)[0])
 def editMsg(msgId,recvId,recvType,contentType,content='content',fileName='fileName',url='url',buttons=False):
     global _db,_dbMaxLength
     YHlib.editMsg(msgId,recvId,recvType,contentType,content,fileName,url,buttons)
     if YHlib.reply['code']==1:
         _db[msgId]={'recvId':recvId,'recvType':recvType,'contentType':contentType,'content':content,'fileName':fileName,'url':url,'buttons':buttons}
         if len(_db)>_dbMaxLength:
-            _db.pop()
+            _db.pop(list(_db.keys)[0])
 def getLastMsg():
     global _db
     return [list(_db.keys())[-1],_db[list(_db.keys())[-1]]]
