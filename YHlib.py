@@ -126,7 +126,7 @@ def onRecvPost():
             for func in onTxtMsgList:
                 func(ctx=msgbox)
     elif json['header']['eventType']=='message.receive.instruction':
-        cmd=json['event']['message']['instructionName']
+        cmd=json['event']['message']['commandName']
         if cmd in onCmdDict:
             msgbox=geneBaseBox(json)
             msgbox['cmd']=cmd
