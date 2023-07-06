@@ -77,14 +77,7 @@ runBot(token="xxx",port=7888)
 `外网IP:7888/ping`  
 成功看到pong即为端口开放成功  
   
-## 小礼物:`Identify.py`,`msgDBmanager.py`:
-针对目前没有官方的用户ID转用户名的api，制作了`Identify.py`这个基于关注和入群事件的转换脚本  
-使用方法如下:  
-~~~Python
-import Identify
-#Yid在此处代表用户id
-print(Identify.fetch(Yid))
-~~~  
+## 小礼物:`msgDBmanager.py`:
 针对目前没有官方的消息列表api，制作了`msgDBmanager.py`这个基于字典的消息列表管理模块  
 使用方法如下:  
 ~~~Python
