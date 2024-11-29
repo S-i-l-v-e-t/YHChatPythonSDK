@@ -79,7 +79,7 @@ def sendMsg(recvId,recvType,contentType,content='content',fileName='fileName',ur
 
 def geneBaseBox(json,cnt=True,btn=True):
     msgbox={}
-    msgbox["type"]=json["event"]["chat"]["chatType"]
+    msgbox["type"]=json["header"]["eventType"]
     if cnt:
         msgbox["contentType"]=json['event']['message']['contentType']
         if msgbox['contentType'] in ('text','markdown'):
